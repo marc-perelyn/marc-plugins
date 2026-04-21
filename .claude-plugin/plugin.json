@@ -1,0 +1,8 @@
+{
+  "name": "marc-plugins",
+  "version": "0.1.0",
+  "description": "Marc Stiller's personal plugin marketplace for Claude Code and Cowork. Houses personal productivity and consulting-workflow plugins that haven't (yet) been promoted to perelyn-plugins.",
+  "author": {
+    "name": "Marc Stiller"
+  }
+}

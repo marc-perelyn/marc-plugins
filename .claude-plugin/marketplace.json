@@ -1,0 +1,13 @@
+{
+  "name": "marc-plugins",
+  "owner": {
+    "name": "Marc Stiller"
+  },
+  "plugins": [
+    {
+      "name": "project-copilot",
+      "source": "./project-copilot",
+      "description": "Operating model for running complex knowledge-work engagements across sessions. Three-layer knowledge architecture (project-context.md map + Notion brain + file system artifacts), standardized 12-database Notion schema, intelligence classification rules, and weekly/monthly hygiene routines. Project-agnostic: each project brings its own .copilot/config.yaml and project-context.md."
+    }
+  ]
+}

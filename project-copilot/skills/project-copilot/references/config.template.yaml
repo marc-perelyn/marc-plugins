@@ -1,0 +1,168 @@
+# project-copilot — per-project configuration
+# Copy to [Project Root]/.copilot/config.yaml and fill in.
+# Every field under `required:` MUST be set. Fields under `optional:` can be
+# omitted if not applicable; skill will use documented defaults.
+
+schema_version: 1
+
+# =============================================================================
+# REQUIRED — skill will refuse to run without these
+# =============================================================================
+
+project:
+  # Short human-readable name, used in briefings and headings
+  name: "[Project Short Name]"
+  # Full formal name, used in client-facing outputs
+  formal_name: "[Full Project Name]"
+  # Client organization name (if applicable — otherwise reuse formal_name)
+  client: "[Client Org]"
+  # Internal role — what the user is doing on this project
+  role: "[e.g. Senior AI Project Lead, Research Lead, Product Owner]"
+  # Project start date (YYYY-MM-DD)
+  start_date: "YYYY-MM-DD"
+  # Planned end date or milestone target
+  target_end_date: "YYYY-MM-DD"
+  # One-sentence mission. This is what the project exists to achieve.
+  mission: "[One sentence]"
+
+paths:
+  # Absolute path to project root — must be the folder that contains
+  # project-context.md and .copilot/
+  root: "[/absolute/path/to/project/root]"
+  # Path where meeting transcripts are filed (relative to root)
+  transcripts: "20 Meetings/Transcripts"
+  # Path where meeting summaries are filed (relative to root)
+  summaries: "20 Meetings/Summaries"
+  # Path where final deliverables live (relative to root)
+  deliverables: "30 Deliverables"
+  # Path where working drafts live (relative to root)
+  working: "60 Working"
+
+notion:
+  # Notion workspace or page that anchors the project's brain
+  workspace_name: "[Workspace name as shown in Notion]"
+  # Optional: top-level page ID that contains all project databases
+  root_page_id: "[Notion page ID or URL]"
+  # Database IDs — fill in once databases are created
+  databases:
+    meetings: "[DB ID or URL]"
+    decisions: "[DB ID or URL]"
+    tasks: "[DB ID or URL]"
+    stakeholders: "[DB ID or URL]"
+    use_cases: "[DB ID or URL]"   # rename this DB if the project's unit of work is different
+    deliverables: "[DB ID or URL]"
+    risks_issues: "[DB ID or URL]"
+    market_intelligence: "[DB ID or URL]"
+    open_questions: "[DB ID or URL]"
+    key_information: "[DB ID or URL]"
+    files_index: "[DB ID or URL]"
+  # If the "Use Cases" DB was renamed for this project, state the label here.
+  # This tells the skill how to refer to the unit of work in briefings.
+  unit_of_work_label: "Use Cases"
+
+language:
+  # Language for client-facing outputs
+  client: "de"       # e.g. de | en | fr
+  # Language for internal/analytical work
+  internal: "en"
+  # Formality style for client outputs (formal | neutral | informal)
+  client_formality: "formal"
+
+calendar:
+  # Primary calendar source. One of: outlook | google | ical | none
+  source: "outlook"
+  # User's timezone (IANA)
+  timezone: "Europe/Berlin"
+
+# =============================================================================
+# OPTIONAL — skill uses defaults if omitted
+# =============================================================================
+
+stakeholders:
+  # Defaults to the user's name/email from environment
+  user_name: "[First Last]"
+  user_email: "[you@company.com]"
+  # Primary client contact
+  primary_client_contact:
+    name: "[First Last]"
+    email: "[them@client.com]"
+    role: "[Title/Function]"
+
+taxonomy:
+  # Project-specific taxonomy that appears in briefings and filing.
+  # Free-form; list the labels you want the skill to respect.
+  # Example (consulting engagement):
+  #   domains:
+  #     - Finance
+  #     - Operations
+  #     - R&D
+  #   stages:
+  #     - Discovery
+  #     - Alignment
+  #     - Design
+  #     - Handover
+  domains: []
+  stages: []
+
+ci:
+  # Client corporate identity assets to apply to client-facing outputs.
+  # Leave empty if no CI constraints apply.
+  enabled: false
+  brand_guide_path: ""     # relative to project root
+  logo_path: ""
+  primary_font: ""
+  primary_color: ""
+  template_pptx: ""
+  template_docx: ""
+
+behavior:
+  # Should the skill reference Claude / Cowork / AI tooling in client-facing
+  # outputs? For most client engagements this should be false.
+  reveal_ai: false
+  # How many days before flagging project-context.md as stale
+  context_staleness_days: 5
+  # Target Layer 1 size in tokens (rough heuristic — 4 chars ~ 1 token)
+  layer1_token_budget: 20000
+  # Weekday the weekly pruning pass should run (0=Mon … 6=Sun)
+  pruning_weekday: 4       # Friday
+  # Weekday for monthly hygiene (first occurrence of this weekday in a month)
+  hygiene_weekday: 0       # Monday
+
+daily_briefing:
+  # Time of day the daily briefing scheduled task should run (24h clock, local)
+  time: "07:30"
+  # Which sections to include — keep short
+  include:
+    - today_meetings
+    - todays_priorities
+    - blockers
+    - open_decisions_waiting_on_user
+    - upcoming_deadlines_next_7_days
+  # Maximum number of tasks to surface per priority bucket
+  max_tasks_per_bucket: 5
+
+research:
+  # Optional weekly market-intelligence scan
+  weekly_scan_enabled: false
+  weekly_scan_topics: []
+  weekly_scan_output: "50 Research/Weekly Scans"
+
+political:
+  # Known political dynamics / rules of engagement that affect how the user
+  # navigates the project. Short, imperative phrasing.
+  # Example:
+  #   rules:
+  #     - "Never copy Board on internal dissent."
+  #     - "Use German in all CFO-facing communication."
+  rules: []
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# - This file is the per-project extension of SKILL.md. The skill is generic;
+#   the config makes it specific.
+# - Do not duplicate operating-model content here. Operating model lives in
+#   SKILL.md.
+# - Changes to this file take effect at the next session start.
+# - Keep secrets out of this file. Store API keys and tokens in the OS keychain
+#   or a dedicated secrets manager.
