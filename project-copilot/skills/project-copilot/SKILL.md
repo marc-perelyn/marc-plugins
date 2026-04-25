@@ -50,6 +50,17 @@ The user's explicit expectation: *"describe the task → engineer perfect contex
 
 **Size budget for Layer 1:** aim for ≤20K tokens (~500 lines). If it exceeds that, a pruning pass is overdue.
 
+**Per-section budgets (hard limits — exceeding them triggers consolidation):**
+
+| Section | Limit | Rule |
+|---|---|---|
+| Stakeholder map | **One** canonical list, ≤25 rows of one-liners (Name · Org · Engagement · single political note) | Full per-person profiles live in Notion Stakeholders. Never maintain two parallel stakeholder lists in Layer 1. |
+| Stakeholder approach rules (political profiles) | ≤200 words per person | Only "how to approach" content. Factual detail (role history, team composition, project ownership) → Notion. |
+| Active Decisions | ≤20 rows | Foundational decisions only. Operational decisions migrate to Notion Decisions DB after ~3 weeks. |
+| Recent Meetings inline | ≤2 weeks old AND ≤5 entries | Older meetings → one-line pointers in the archive index. |
+| Current Focus block | ≤15 lines | Top goal + active landmines + next 2-week milestones + next decision point. Replaced wholesale at each prune; never appended. |
+| "Last updated" header | One paragraph | Not a chain of nested prior-value paragraphs. Use a separate change-log section if persistence is needed. |
+
 ---
 
 ## 3. Session Lifecycle
@@ -194,10 +205,10 @@ Use this default folder structure. Project-specific extensions go in the 70+ ran
 - Reconcile Current Focus against the next week.
 - Update "Last updated" line.
 
-**Monthly (first Monday, ~45 min):**
-- Notion hygiene pass (see `references/notion-hygiene.md`).
+**Monthly (first Monday, ~45 min — extend to ~75 min if Layer 1 consolidation runs):**
 - File-system hygiene pass (see `references/filesystem-hygiene.md`).
-- Size check on project-context.md — if >20K tokens, trigger a consolidation pass.
+- Notion hygiene pass (see `references/notion-hygiene.md`).
+- Layer 1 size + structure check. If `project-context.md` is over `behavior.layer1_token_budget`, OR the most recent weekly prune flagged structural drift (parallel stakeholder lists, Current Focus over budget, "Last updated" header journaling), run the Layer 1 consolidation pass (see `references/layer1-consolidation.md`). Consolidation is the only place where Layer 1 sections get restructured — weekly pruning never restructures.
 
 **Quarterly:**
 - Architecture review. Confirm skill + config still reflects how the project actually works.
@@ -245,9 +256,11 @@ The critical insights that changed how work gets done should already have migrat
 
 These are failure modes the user has experienced and explicitly wants you to avoid.
 
-1. **Do not journal into Layer 1.** Every meeting gets its full summary in Layer 3 and its operational entry in Layer 2. Layer 1 receives only the pattern-breaking insights that change behavior.
-2. **Do not let Layer 1 exceed ~20K tokens.** If it does, propose a pruning pass before continuing.
-3. **Do not duplicate content across layers.** If something is in Notion, don't also put the full detail in Layer 1. Put a pointer.
+1. **Do not journal into Layer 1.** Every meeting gets its full summary in Layer 3 and its operational entry in Layer 2. Layer 1 receives only the pattern-breaking insights that change behavior. Two specific anti-patterns:
+   - **The "Last updated" header is one paragraph, not a journal.** Do not chain nested prior-value paragraphs ("Last updated: X — prior value: Y — prior value: Z…"). If change history needs to persist, put it in a separate change-log section below the header. The header itself describes the current state only.
+   - **Current Focus is replaced wholesale at each prune, not appended.** The block should describe what's hot *now*, not accumulate week-by-week deltas. Prior states are gone — they live in Notion via the records that drove them (meeting summaries, decisions, tasks, risks). Operational deltas that don't promote into permanent intelligence belong in Notion, not in a delta block in Layer 1.
+2. **Do not let Layer 1 exceed ~20K tokens.** If it does, propose a pruning pass before continuing. If a normal prune can't get under budget, the right move is a monthly consolidation (`references/layer1-consolidation.md`), not a bigger weekly prune.
+3. **Do not duplicate content across layers.** If something is in Notion, don't also put the full detail in Layer 1. Put a pointer. **Specifically: never maintain two parallel stakeholder lists in Layer 1** — one canonical list with name + one-liner is the rule; full per-person profiles live in Notion Stakeholders.
 4. **Do not update Layer 1 in the middle of work unless explicitly instructed.** Layer 1 updates are a deliberate ritual, not a side effect.
 5. **Do not skip context assembly.** The intended workflow requires it. Shortcuts here produce shallow, generic outputs.
 6. **Do not modify Layer 1 from scheduled tasks.** Only interactive sessions update it. Scheduled tasks flag changes needed.
@@ -276,8 +289,9 @@ When the user says one of these, act accordingly:
 
 - **"Update the context file"** or **"update the brain"** → Read project-context.md, identify what changed since last update, update relevant sections, update "Last updated" line. Also update Notion in parallel if operational items changed.
 - **"Update Notion"** → Identify which databases need updates. Search Notion for existing entries first to avoid duplicates. Create or update as needed.
-- **"Run weekly pruning"** → Execute `references/weekly-pruning.md`.
-- **"Run monthly hygiene"** → Execute `references/notion-hygiene.md` and `references/filesystem-hygiene.md`.
+- **"Run weekly pruning"** → Execute `references/weekly-pruning.md`. Includes a Step 0 structural diagnostic that detects (but does not execute) consolidation needs.
+- **"Run monthly hygiene"** → Execute `references/filesystem-hygiene.md`, then `references/notion-hygiene.md`, then a Layer 1 size + structure check. If the check flags drift, execute `references/layer1-consolidation.md`.
+- **"Consolidate Layer 1"** or **"run consolidation"** → Execute `references/layer1-consolidation.md` directly (escape hatch when drift is detected mid-month and the user wants to act before next monthly hygiene).
 - **"New project"** → Execute `references/new-project-setup.md` to bootstrap a new project with this skill.
 
 ---
@@ -291,6 +305,7 @@ All reference files live under this skill's `references/` directory:
 - Weekly pruning procedure: `references/weekly-pruning.md`
 - Notion hygiene procedure: `references/notion-hygiene.md`
 - File-system hygiene procedure: `references/filesystem-hygiene.md`
+- Layer 1 consolidation procedure: `references/layer1-consolidation.md`
 - New project bootstrap: `references/new-project-setup.md`
 
 ---

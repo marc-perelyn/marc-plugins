@@ -10,7 +10,33 @@
 
 1. Confirm the session has loaded `SKILL.md`, the project's `config.yaml`, and `project-context.md`.
 2. Snapshot `project-context.md` to `.copilot/backups/YYYY-MM-DD_weekly-pre-prune.md` before any edit.
-3. Check current token size of Layer 1. If > `behavior.layer1_token_budget`, flag this to the user and suggest a heavier consolidation pass rather than a normal prune.
+3. Check current token size of Layer 1. If > `behavior.layer1_token_budget`, note it — Step 0 will surface the consequences.
+
+---
+
+## Step 0 — Structural diagnostics (1 min, detect-only)
+
+Before pruning, run this checklist. It detects structural drift that a normal prune cannot fix in its time budget. Step 0 **never executes** consolidation — it surfaces flags and proposes targeted moves, then the prune continues at normal scope. Consolidation work belongs to monthly hygiene (`references/layer1-consolidation.md`).
+
+Diagnostic checks:
+
+1. **Parallel stakeholder lists.** Scan the file for stakeholders appearing in two different sections with similar metadata (e.g. a "Stakeholder Map" table and a "Quick Reference" table both listing the same people). The SKILL rule is one canonical list of one-liners; full per-person profiles belong in Notion Stakeholders. Flag if found.
+2. **Current Focus over budget.** Locate the Current Focus block (typically Section 12 or named equivalent). If it exceeds 15 lines, flag it.
+3. **Layer 1 over budget AND not shrinking.** Compare the current token size against `behavior.layer1_token_budget`. If over budget AND the previous weekly-prune backup was also over budget AND the file size grew or stayed flat between them, flag it. (One pass over budget is normal; sustained drift is the signal.)
+4. **"Last updated" header journaling.** If the header at the top of `project-context.md` contains nested prior-value paragraphs ("Last updated: X — prior value: Y — prior value: Z…"), flag it. The header should be one paragraph describing the current state; persisted change history belongs in a separate change-log section.
+5. **Stakeholder profiles describing facts, not approach.** Spot-check 2–3 entries in the political-intelligence section. If sentences describe the person (role, history, team composition) rather than how to approach them, flag it. Factual detail belongs in Notion Stakeholders.
+6. **Operational status accumulating delta blocks.** If the Current Focus section contains multiple dated delta sub-blocks ("Apr 22 delta", "Apr 23 delta", "Apr 24 delta") instead of a single replaced-wholesale block, flag it.
+
+If any check fires, surface this to the user as a single block:
+
+```
+Structural drift detected — weekly prune cannot fix this.
+- [Flag 1]: [specific evidence + proposed move]
+- [Flag 2]: …
+Recommendation: Run /monthly-hygiene (or `references/layer1-consolidation.md` directly) to address.
+```
+
+Then continue with the normal prune (Steps 1–6) at normal scope. Do not attempt to consolidate inside the weekly pass — that breaks the time budget and increases risk.
 
 ---
 
@@ -115,5 +141,5 @@ Do not report anything else unless the user asks. Do not re-summarize the projec
 
 - **Do not delete meeting entries before promotion.** You lose intelligence permanently.
 - **Do not migrate foundational decisions to Notion.** Only operational/absorbed ones.
-- **Do not let the prune turn into a restructure.** If the file needs a restructure, stop and ask the user.
+- **Do not let the prune turn into a restructure.** If Step 0 detects drift, the answer is to flag it and dispatch to `references/layer1-consolidation.md` via monthly hygiene — never to handle restructure work inside the weekly time budget.
 - **Do not skip the backup.** Every prune creates a restorable snapshot.
