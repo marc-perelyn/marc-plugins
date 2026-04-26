@@ -83,10 +83,18 @@ The user's explicit expectation: *"describe the task → engineer perfect contex
 
 ### Session end (if significant work was done)
 
-- Offer to update the "Current Focus" block in project-context.md if materially changed.
-- Offer to update relevant Notion databases.
+When the user says "close session", "end session", "wrap up", or runs `/close-session`, execute `references/close-session.md`. The procedure:
+
+- Diffs `project-context.md` against the most recent pre-session backup; flags staleness in the header, §19b, and the change log.
+- Scans the session transcript for open loops — decisions, tasks, risks, meetings, stakeholders, open questions, implied handoffs that need a Notion or `.copilot/handoffs/` home.
+- Lists `.copilot/handoffs/*.md` and proposes moves to `_done/` for resolved items.
+- Presents a single ≤15-line approval block. Partial approval is fine; never destructive without explicit go-ahead.
+- Executes approved Notion writes + handoff moves + small Layer 1 fixes (header refresh, change-log line). Bails early if the session was conversational-only.
+
+Hard rules (these stay):
+
 - File any new artifacts into the correct Layer 3 location.
-- Do NOT re-journal the session into project-context.md. That is the failure mode that caused this skill to exist.
+- Do NOT re-journal the session into project-context.md. The change-log entry is a single dated line, not a narrative. Detail belongs in Notion.
 
 ---
 
@@ -292,6 +300,7 @@ When the user says one of these, act accordingly:
 - **"Run weekly pruning"** → Execute `references/weekly-pruning.md`. Includes a Step 0 structural diagnostic that detects (but does not execute) consolidation needs.
 - **"Run monthly hygiene"** → Execute `references/filesystem-hygiene.md`, then `references/notion-hygiene.md`, then a Layer 1 size + structure check. If the check flags drift, execute `references/layer1-consolidation.md`.
 - **"Consolidate Layer 1"** or **"run consolidation"** → Execute `references/layer1-consolidation.md` directly (escape hatch when drift is detected mid-month and the user wants to act before next monthly hygiene).
+- **"Close session"**, **"end session"**, **"wrap up"** → Execute `references/close-session.md` (diff Layer 1, scan for open loops, file handoffs, emit summary). Bails early on conversational-only sessions.
 - **"New project"** → Execute `references/new-project-setup.md` to bootstrap a new project with this skill.
 
 ---
@@ -306,6 +315,7 @@ All reference files live under this skill's `references/` directory:
 - Notion hygiene procedure: `references/notion-hygiene.md`
 - File-system hygiene procedure: `references/filesystem-hygiene.md`
 - Layer 1 consolidation procedure: `references/layer1-consolidation.md`
+- Session-close procedure: `references/close-session.md`
 - New project bootstrap: `references/new-project-setup.md`
 
 ---
