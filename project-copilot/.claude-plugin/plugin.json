@@ -1,6 +1,6 @@
 {
   "name": "project-copilot",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Operating model for running complex knowledge-work engagements across sessions. Three-layer knowledge architecture (project-context.md + Notion brain + file system), 12-database Notion schema, intelligence classification, session lifecycle, and hygiene routines. Project-agnostic — each project supplies its own .copilot/config.yaml and project-context.md.",
   "author": {
     "name": "Marc Stiller"
