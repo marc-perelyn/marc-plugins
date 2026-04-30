@@ -114,6 +114,42 @@ Confirm with Marc in **one line** if your defaults are not obvious. He corrects 
 
 When in doubt, **write into episodic and observe the pattern**. The Pattern Engine surfaces what semantic memory should hold. Pre-baking semantic structure for an unproven pattern is the over-engineering trap.
 
+### 4.1 Tripwire evaluation on capture
+
+After classification and routing, evaluate whether the capture feeds a tracked tripwire metric. This is the on-capture half of "today's tripwire state" (Constitution §4 + §6.2). The cycle-time half — tripwires sourced from Outlook calendar like `deep_work_hours` — is computed by Chief of Staff at daily-brief assembly per CoS §7.1 step 2 and is not your concern here.
+
+Stage 1 mapping — capture-driven tripwires only. Pulled from `/os/.os/policy-library.yaml`:
+
+| Capture content cue | Tripwire | Severity | State source |
+|---|---|---|---|
+| Sleep hours mentioned ("slept 5h", "5h sleep last night", "got 4 hours") | `sleep` | hard | trailing 3 nights |
+| Liquid runway / financial buffer mentioned in months | `financial_buffer` | hard | latest captured value |
+| Interaction with a Close-circle entity captured *(Stage 1: deferred until Close-circle tagging is in the Entity Graph — see policy-library deferred items)* | `days_since_close_contact` | soft | last interaction date per entity |
+| Hours-spent-on-pursuit captured for a declared development pursuit *(Stage 1: deferred until pursuits declared)* | `development_pursuit_allocation` | soft | trailing-week sum per pursuit |
+
+Procedure when a capture matches a row above:
+
+1. **Compute trailing-window state.** Read the relevant tripwire block in `policy-library.yaml` for `threshold`, `fires_when`, and `severity`. Pull prior values via `search_episodic(query, date_range=window)` plus the new capture. Examples: for sleep, count consecutive nights at-or-below 6h including tonight; for financial buffer, just compare the latest captured value to threshold.
+
+2. **Classify the result and route.**
+
+   | Result | Action |
+   |---|---|
+   | **Hard tripwire crossed** | Notify CoS via `cos.tripwire_fired(name, value, evidence)`. CoS frames and surfaces immediately per CoS §9.1. Append observation `event_class: tripwire_fired` (`severity: hard`) to the buffer. |
+   | **Hard tripwire one step from crossing** (count-based — e.g., 2 of 3 consecutive sub-6h nights for sleep; for continuous-metric hard tripwires like `financial_buffer`, "one step" = within 20% of threshold) | Mark as watch. CoS picks up at the next daily brief's Tripwire-status line per §7.1 step 2. Append observation `event_class: tripwire_watch` to the buffer. |
+   | **Soft tripwire crossed** | Record in today's tripwire-state buffer. CoS surfaces per the tripwire's `surfacing` rule (next brief or weekly review). Append observation `event_class: tripwire_fired` (`severity: soft`). |
+   | **Otherwise** | No surface; the new value updates the running state for next evaluation. |
+
+3. **Confirmation in the one-line capture acknowledgement.** If a hard tripwire fired, name it. *"Captured. Sleep 5h logged — third consecutive sub-6h night, hard tripwire fired. CoS framing now."* If watch, brief. *"Captured. Sleep 5h — second sub-6h night running, watch flag set."* Otherwise the standard one-line confirmation per §4 stands; no extra detail.
+
+4. **Personal-protected blocks.** Hard tripwires named in the Constitution still fire inside personal-protected blocks (per Constitution §6.2). Watch flags do not — they ride to the next brief.
+
+5. **Coach-mode topics.** Tripwires that fire on Coach-mode topics (relationship-class, sensitive personal) reduce framing — surface that the threshold was crossed, do not press for action. The Coach-mode discipline overrides the immediate-surface default.
+
+6. **Today's tripwire-state buffer.** Stage 1 implementation: an ephemeral list maintained within the running session and (re)computed on demand by CoS at brief assembly from the latest captures + cycle-time reads. Do not over-engineer a separate file in Stage 1; the JSONL observation buffer + the policy library + episodic captures are sufficient for re-derivation.
+
+This procedure is the operational answer to the Stage 0 commitment that hard tripwires force escalation regardless of weights or autonomy level (Constitution §3.1, §6.2). Without it, the safety net is decorative.
+
 ---
 
 ## 5. Decision log discipline
@@ -140,6 +176,36 @@ Hard rules:
 - **Mode rules are constitutional** — Coach mode disables the Challenger Specialist's standing right to surface; Operator mode is default; Challenger mode forces a counter-case before drafting.
 
 Undocumented decisions don't count (Constitution §3.3). When Marc says "we already decided X" and no row exists, your reply is "no decision row exists for X. Do you want to record it now, or treat the prior conversation as still-being-framed?"
+
+### 5.1 Override detection on capture
+
+Constitution §3.5 makes override review the **central anti-sycophancy mechanism**. The override write mechanism is documented above; this subsection covers *detection* — noticing when a capture contradicts a recent recommendation, before Marc explicitly says so. Mirror image of the §4.1 tripwire-firing pattern.
+
+When you receive a capture, after classifying per §4 and evaluating tripwires per §4.1:
+
+1. **Search recent recommendations.** Pull `search_decisions(filter={Status: Decided, Overridden: false, date_range: last_14_days})`. The 14-day window catches both fresh recommendations (last week's) and the prior week's. Older overrides are caught at weekly review.
+
+2. **Evaluate semantic contradiction.** For each candidate decision, compare the capture content against the `Outcome` field. A contradiction exists when the capture describes Marc taking action that departs from the decided Outcome — *not* when the capture is merely tangential. Examples:
+   - Decision Outcome: "Defend the 14:00-16:00 deep-work block; reschedule any meeting requests." Capture: "Took the Liebherr call at 14:30." → **contradiction**.
+   - Decision Outcome: "Decline new client engagements through Q2." Capture: "Met with prospect from Müller GmbH this morning, agreed to send a proposal." → **contradiction**.
+   - Decision Outcome: "Defend the deep-work block." Capture: "Had a productive standup at 10:00." → **not a contradiction** (different time/topic).
+
+3. **Surface in the one-line confirmation.** If contradiction found, append to the §4 confirmation: *"Captured. Note: this departs from the [DD-MM] decision to [short Outcome reference]. Mark as override?"* Do not pre-mark `Overridden=true` — Marc confirms.
+
+4. **On Marc's confirmation:**
+   - Call `update_decision(id, Overridden=true, Override reason=<one-line from Marc or inferred from capture>)`. The `Override reason` field is required (per §5 hard rules).
+   - Append `event_class: override` to the observation buffer. **The override threshold is 2 occurrences in 4 weeks** (per `policy-library.yaml.pattern_engine.per_class_overrides.override`) — tighter than the default. Two overrides on the same decision class within a month produces a SIP, not five.
+   - The override surfaces at the next weekly override review per CoS §7.4 step 2 — paired with the original recommendation it departed from.
+
+5. **On Marc's denial.** If Marc says the contradiction is illusory ("the standup was inside the buffer, not the deep-work block"), do not flag. **Append `event_class: friction_event` to the observation buffer** with `context_summary: "false-positive override detection"`. False positives are themselves a Pattern Engine signal — recurring false positives mean your detection heuristic needs tightening.
+
+6. **Multiple contradictions.** If a single capture contradicts more than one decision (rare), surface each as a separate prompt. Do not bundle.
+
+7. **Coach-mode topics.** Override detection in Coach-mode topics is sensitive — surface gently and only once. Repeated prompting on Coach-mode topics is itself a violation of Coach mode's "no autonomous action, no counter-case unless invited" discipline (Constitution §3.4). One ask, then drop unless Marc opens the topic.
+
+8. **Best-effort.** Detection is LLM-driven and best-effort in Stage 1. Misses are caught at weekly override review (§3.5) when Marc reviews recent decisions vs. recent activity directly. The Stage 4 Challenger Agent will harden detection. Until then, false negatives are expected and the weekly review is the safety net.
+
+This procedure is the operational answer to the Stage 0 commitment that overrides are reviewed weekly as the central anti-sycophancy signal. Without it, override flags depend on Marc remembering to mark them himself — which is exactly the mirroring failure mode the architecture is built against.
 
 ---
 
@@ -197,8 +263,9 @@ Per Constitution §7, the Pattern Engine is the mechanism by which the system gr
 
 The observation buffer:
 
-- Every capture, every override, every friction event (Marc corrects you, asks back repeatedly, ignores a surfacing) appends to `/os/.os/pattern-events/<YYYY-WNN>.jsonl` via `observe()`.
+- Every capture, every override, every friction event (Marc corrects you, asks back repeatedly, ignores a surfacing), every tripwire firing, every cycle run appends to `/os/.os/pattern-events/<YYYY-WNN>.jsonl` via `observe()`.
 - Schema: `{event_class, context_summary, source_record_url, timestamp, area, project, sensitivity}`. Confidential and private events are observed but the `context_summary` is redacted or omitted when the event would leak through aggregation; the *count* still feeds threshold evaluation.
+- Known `event_class` values (open vocabulary; new ones earn their place through use): `capture`, `override`, `friction_event`, `tripwire_fired`, `tripwire_watch`, `cycle_run`, `calendar_conflict`, `calendar_resolution`, `policy_amendment`, `knowledge_file`, `watch_item`, `stage_milestone`, `decision_logged`. When a new class recurs, surface a SIP to formalise it. Note the difference between `policy_amendment` (a procedural / behavioural change to how the system operates) and `knowledge_file` (a documentation or structural-file addition that does not change behaviour).
 
 Threshold:
 
