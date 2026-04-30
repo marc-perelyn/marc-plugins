@@ -59,14 +59,32 @@ claude plugins install personal-os@marc-plugins
 
 In Cowork, the plugin is picked up automatically once the marketplace is registered.
 
-## Skill Invocation
+## Slash commands
 
-Skills trigger automatically on phrases that match their declared description (see each skill's frontmatter). Common entry points:
+Explicit entry points. Shipped as of 2026-04-30.
 
-- *"Remember that…", "log this", "capture"* — Knowledge Steward classifies and routes.
+| Command | Purpose | Anchored to |
+|---|---|---|
+| `/personal-os:capture <text>` | Sub-10-second capture; KS classifies (task / promise / fact / observation / event / decision / reference) and routes with smart defaults; surfaces tripwire firings on capture per KS §4.1; surfaces override candidates per KS §5.1. | Constitution §6.1 |
+| `/personal-os:daily-brief` | On-demand morning brief per CoS §7.1. ≤2-min read. Today's commitments, tripwire status, open decisions, decisions-due-for-review-today, yesterday's overrides, optional forcing-function note. | Constitution §6.2 / §6.3, CoS §7.1 |
+| `/personal-os:evening-shutdown` | On-demand evening close-out per CoS §7.3. ≤5-min interaction. Tomorrow prep / open loops / decisions logged / drift / "Laptop closes." | Constitution §6.2 / §6.3, CoS §7.3 |
+
+Cycles still on cron (calendar-pinned non-negotiables, not slash commands):
+
+- **Weekly review** — Fri 17:00 (Marc's confirmed time); scheduled task `personal-os-weekly-review`. Per CoS §7.4.
+- **Monthly hygiene + Quarterly meta-review** — first Mon 09:00, smart-routed by date; scheduled task `personal-os-monthly-quarterly-hygiene`. Per CoS §7.5 / §7.6.
+
+The daily brief and evening shutdown are deliberately **on-demand** rather than cron-scheduled — Cowork scheduled tasks fire only when the Mac is awake and Claude Desktop is open, and these cycles' temporal anchors ("when I sit down" / "before I close the laptop") are not wall-clock facts. Active pacing is in scope per Constitution §6.3 + CoS §13 but **deferred** in `policy-library.yaml` until daily-brief data exists to pace against.
+
+## Skill auto-invocation
+
+Skills also trigger automatically on phrases that match their declared description (see each skill's frontmatter). Common entry points beyond the slash commands above:
+
+- *"Remember that…", "log this"* — Knowledge Steward classifies and routes (same as `/capture`).
 - *"What do I know about…", "show me decisions on…", "what's open"* — Knowledge Steward retrieval.
-- *"Daily brief", "weekly review", "monthly hygiene"* — Chief of Staff cycle invocation.
-- *"What should I focus on", "what's drifting"* — Chief of Staff orchestration.
+- *"What should I focus on", "what's drifting", "where do I stand"* — Chief of Staff orchestration.
+- *"Is this material", "should I escalate this"* — Chief of Staff §6.4 decision protocol orchestration.
+- *"Coach mode", "Challenger mode"* — mode switches (Constitution §3.4).
 
 ## State (lives outside this plugin)
 
@@ -90,15 +108,31 @@ personal-os/
 ├── skills/
 │   ├── knowledge-steward/
 │   │   ├── SKILL.md                     # memory ownership + Pattern Engine
+│   │   │                                #   §4 capture classification
+│   │   │                                #   §4.1 tripwire evaluation on capture
+│   │   │                                #   §5 decision log discipline
+│   │   │                                #   §5.1 override detection on capture
+│   │   │                                #   §7 hierarchical compression + hygiene
+│   │   │                                #   §8 Pattern Engine
 │   │   └── references/
 │   │       └── sip-template.md          # System Improvement Proposal template
 │   └── chief-of-staff/
 │       ├── SKILL.md                     # orchestration + autonomy ladder + cycles
+│       │                                #   §7.1 daily brief
+│       │                                #   §7.3 evening shutdown
+│       │                                #   §7.4 weekly review
+│       │                                #   §7.5 monthly hygiene
+│       │                                #   §7.6 quarterly meta-review
+│       │                                #   §9 routing rules
+│       │                                #   §9.1 tripwire_fired receiver procedure
 │       └── references/                  # (filled as patterns warrant)
-└── commands/                            # slash commands (added as cycles get pinned)
+└── commands/
+    ├── capture.md                       # /personal-os:capture
+    ├── daily-brief.md                   # /personal-os:daily-brief
+    └── evening-shutdown.md              # /personal-os:evening-shutdown
 ```
 
-Commands for the daily/weekly/monthly/quarterly cycles will be added as the cycles are calendar-pinned and operationally tested. Per the Constitution's pattern-driven-evolution rule, command surface earns its place from observed need, not pre-baking.
+New commands earn their place from observed need per the Constitution's pattern-driven-evolution rule, not from pre-baking. Stage 4 will likely add commands as Comms / Researcher / Challenger ship.
 
 ## Authoring Notes
 
