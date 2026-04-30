@@ -8,6 +8,11 @@
       "name": "project-copilot",
       "source": "./project-copilot",
       "description": "Operating model for running complex knowledge-work engagements across sessions. Three-layer knowledge architecture (project-context.md map + Notion brain + file system artifacts), standardized 12-database Notion schema, intelligence classification rules, and weekly/monthly hygiene routines. Project-agnostic: each project brings its own .copilot/config.yaml and project-context.md."
+    },
+    {
+      "name": "personal-os",
+      "source": "./personal-os",
+      "description": "Marc Stiller's Personal Operating System. Stage 1: Knowledge Steward (memory ownership, hierarchical compression, Pattern Engine) and Chief of Staff (orchestration, autonomy ladder, daily/weekly/monthly/quarterly cycles). Built on a fixed roster of five System Agents, a library of Specialist roles per domain, and a constitutional decision protocol. State (Constitution, decision log, episodic memory) lives in projects/os/ and Notion; this plugin holds the operating model."
     }
   ]
 }

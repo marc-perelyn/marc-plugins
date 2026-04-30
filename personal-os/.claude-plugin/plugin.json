@@ -1,0 +1,8 @@
+{
+  "name": "personal-os",
+  "version": "0.1.0",
+  "description": "Marc Stiller's Personal Operating System — a small, durable arrangement of System Agents, Specialists, and shared memory operating on the Principal's behalf within explicit constitutional limits. Stage 1 ships Knowledge Steward (memory ownership) and Chief of Staff (orchestration); Specialists, Comms, Researcher, and Challenger arrive in later stages on evidence. Per the Stage 0 constitution at /os/stage-0-constitution-and-architecture.md.",
+  "author": {
+    "name": "Marc Stiller"
+  }
+}
